@@ -1,5 +1,5 @@
 # GitHub'ga push qilinganda (yoki Actions sahifasidan qo'lda) APK build qiladi.
-# Tayyor APK: Actions -> oxirgi run -> Artifacts -> usta-bonus-apk
+# Tayyor APK: Releases -> Latest (yoki Actions -> run -> Artifacts)
 name: Build APK
 
 on:
@@ -7,14 +7,17 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -47,3 +50,15 @@ jobs:
           name: usta-bonus-apk
           path: build/app/outputs/flutter-apk/*.apk
           retention-days: 14
+
+      # Telefonda to'g'ridan-to'g'ri yuklab olish uchun: Releases -> Latest
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Usta Bonus demo ${{ github.run_number }}
+          make_latest: true
+          body: |
+            Demo build. Kirish: istalgan raqam, kod 111111. Demo usta: 90 000 00 00.
+            Ko'pchilik telefonlarga: app-arm64-v8a-release.apk
+          files: build/app/outputs/flutter-apk/*.apk
